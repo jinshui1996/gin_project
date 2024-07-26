@@ -5,9 +5,10 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"gin_project/config"
 )
 
-var secret = "secret" // 密钥，用于签名和验证token
+// var secret = "secret" // 密钥，用于签名和验证token
 
 type Claims struct {
 	jwt.RegisteredClaims
@@ -18,7 +19,9 @@ type Claims struct {
 
 // 生成token的函数
 func GenerateToken(claims *Claims) (string, error) {
-	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * 5)) // set expire time
+	var secret = config.EnvConfig.Jwt.Secret // 密钥，用于签名和验证token
+	var expires = config.EnvConfig.Jwt.Expires
+	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(expires))) // set expire time
 	
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(secret))
 	if err != nil {
@@ -30,7 +33,7 @@ func GenerateToken(claims *Claims) (string, error) {
 // 解析token的函数
 func JwtVerify(tokenStr string) (*Claims, error) {
 
-	// Envconfig := configs.EnvConfig
+	var secret = config.EnvConfig.Jwt.Secret // 密钥，用于签名和验证token
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

@@ -6,6 +6,7 @@ import (
     _ "github.com/go-sql-driver/mysql"
 	"fmt"
 	"log"
+	"gin_project/config"
 )
 
 type Mysql struct {
@@ -25,7 +26,15 @@ func NewMysql() *Mysql {
 }
 
 func (m *Mysql) Connect() error {
-    db, err := sql.Open("mysql", "root:123456@tcp(127.0.0.1:3306)/test")
+	var username = config.EnvConfig.Mysql.Username
+	var password = config.EnvConfig.Mysql.Password
+	var host = config.EnvConfig.Mysql.Host
+	var port = config.EnvConfig.Mysql.Port
+	var database = config.EnvConfig.Mysql.Database
+
+    fmt.Println(username + ":" + password + "@tcp(" + host + ":" + port + ")/" + database)
+
+    db, err := sql.Open("mysql", username + ":" + password + "@tcp(" + host + ":" + port + ")/" + database)
     if err != nil {
 		log.Fatal(err)
         return err
